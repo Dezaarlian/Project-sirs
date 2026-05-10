@@ -16,6 +16,7 @@ return new class extends Migration
     $table->string('nik', 16)->unique()->nullable(); // Nomor Induk Kependudukan
     $table->string('name');
     $table->string('email')->unique();
+    $table->timestamp('email_verified_at')->nullable();
     $table->string('no_hp')->nullable(); // Untuk notifikasi WA/SMS
     $table->enum('role', ['pasien', 'resepsionis', 'petugas_poli'])->default('pasien');
     $table->string('password');
