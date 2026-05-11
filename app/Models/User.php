@@ -55,4 +55,19 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Antrean::class);
     }
+
+    /**
+     * Determine if the user has verified their email address.
+     *
+     * @return bool
+     */
+    public function hasVerifiedEmail()
+    {
+        // Jika role bukan pasien/anggota, anggap selalu terverifikasi
+        if ($this->role !== 'pasien' && $this->role !== 'anggota') {
+            return true;
+        }
+
+        return ! is_null($this->email_verified_at);
+    }
 }
