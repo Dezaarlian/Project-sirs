@@ -21,13 +21,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
         ]);
 
-        User::create([
-            'name'     => 'Petugas Poli Umum',
-            'email'    => 'petugas@rs.com',
-            'no_hp'    => '08111000002',
-            'role'     => 'petugas_poli',
-            'password' => Hash::make('password'),
-        ]);
+
 
         // ─── Demo Pasien ───────────────────────────────────────────────────
         User::create([
@@ -56,6 +50,34 @@ class DatabaseSeeder extends Seeder
             'kode_poli'     => 'PANAK',
             'nama_poli'     => 'Poli Anak',
             'kuota_harian'  => 25,
+        ]);
+
+        // ─── Petugas Poli Accounts ─────────────────────────────────────────
+        User::create([
+            'name'          => 'Petugas Poli Umum',
+            'email'         => 'umum@rs.com',
+            'no_hp'         => '08111000002',
+            'role'          => 'petugas_poli',
+            'password'      => Hash::make('password'),
+            'poliklinik_id' => $poli_umum->id,
+        ]);
+
+        User::create([
+            'name'          => 'Petugas Poli Gigi',
+            'email'         => 'gigi@rs.com',
+            'no_hp'         => '08111000003',
+            'role'          => 'petugas_poli',
+            'password'      => Hash::make('password'),
+            'poliklinik_id' => $poli_gigi->id,
+        ]);
+
+        User::create([
+            'name'          => 'Petugas Poli Anak',
+            'email'         => 'anak@rs.com',
+            'no_hp'         => '08111000004',
+            'role'          => 'petugas_poli',
+            'password'      => Hash::make('password'),
+            'poliklinik_id' => $poli_anak->id,
         ]);
 
         // ─── Jadwals ───────────────────────────────────────────────────────

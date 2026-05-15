@@ -84,22 +84,45 @@
         }
 
         /* ─── NOW SERVING ─── */
-        .now-serving {
+        .now-serving-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 3rem;
+            padding: 2rem;
             position: relative;
             overflow: hidden;
+            flex: 1;
         }
-        .now-serving::before {
+        .now-serving-container::before {
             content: '';
             position: absolute;
             top: -200px; left: -200px;
             width: 600px; height: 600px;
             background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
             border-radius: 50%;
+        }
+        .active-calls-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            width: 100%;
+            justify-content: center;
+            align-items: stretch;
+        }
+        .now-serving {
+            flex: 1;
+            min-width: 250px;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 22, 40, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem 1.5rem;
+            position: relative;
         }
         .now-serving-label {
             display: flex;
@@ -123,7 +146,7 @@
             50% { opacity: 0.5; transform: scale(0.8); }
         }
         .ticket-number {
-            font-size: clamp(6rem, 18vw, 14rem);
+            font-size: clamp(4rem, 12vw, 8rem);
             font-weight: 900;
             letter-spacing: -0.04em;
             line-height: 1;
@@ -341,24 +364,29 @@
         <div class="content">
 
             {{-- Now Serving --}}
-            <div class="now-serving">
-                @if($panggilanAktif)
-                    <div class="now-serving-label">
-                        <div class="pulse-dot"></div>
-                        SEDANG DIPANGGIL
-                    </div>
-                    <div class="ticket-number">{{ $panggilanAktif->nomor_urut }}</div>
-                    <div class="patient-info">
-                        <div class="patient-name">{{ $panggilanAktif->user->name }}</div>
-                        <div class="patient-poli">{{ $panggilanAktif->jadwal->poliklinik->nama_poli }}</div>
-                        <div class="patient-doctor">{{ $panggilanAktif->jadwal->nama_dokter }}</div>
-                        <div class="status-badge">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
-                            Silakan Masuk ke Ruang Poli
+            <div class="now-serving-container">
+                @if($panggilanAktif->isNotEmpty())
+                    <div class="active-calls-grid">
+                        @foreach($panggilanAktif as $aktif)
+                        <div class="now-serving">
+                            <div class="now-serving-label">
+                                <div class="pulse-dot"></div>
+                                {{ $aktif->jadwal->poliklinik->nama_poli }}
+                            </div>
+                            <div class="ticket-number">{{ $aktif->nomor_urut }}</div>
+                            <div class="patient-info">
+                                <div class="patient-name" style="font-size: 1.5rem;">{{ $aktif->user->name }}</div>
+                                <div class="patient-doctor">{{ $aktif->jadwal->nama_dokter }}</div>
+                                <div class="status-badge" style="margin-top: 1rem; padding: 0.35rem 1rem; font-size: 0.7rem;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+                                    Silakan Masuk
+                                </div>
+                            </div>
                         </div>
+                        @endforeach
                     </div>
                 @else
-                    <div style="text-align: center;">
+                    <div style="text-align: center; margin: auto;">
                         <div style="font-size: 5rem; margin-bottom: 1.5rem; opacity: 0.2;">🔔</div>
                         <div class="ticket-empty">—</div>
                         <div class="no-call-text" style="margin-top: 1.5rem;">

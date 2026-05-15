@@ -26,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'nik',
         'no_hp',
         'role',
+        'poliklinik_id',
     ];
 
     /**
@@ -54,6 +55,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function antreans()
     {
         return $this->hasMany(Antrean::class);
+    }
+
+    public function poliklinik()
+    {
+        return $this->belongsTo(Poliklinik::class, 'poliklinik_id');
     }
 
     /**

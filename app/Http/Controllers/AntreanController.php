@@ -65,10 +65,18 @@ class AntreanController extends Controller
 
     public function dashboardPetugas()
     {
-        $antreans = Antrean::with('user', 'jadwal.poliklinik')
-            ->whereDate('tanggal_berobat', today())
-            ->orderBy('id', 'asc')
-            ->get();
+        $userPoliklinikId = auth()->user()->poliklinik_id;
+
+        $antreansQuery = Antrean::with('user', 'jadwal.poliklinik')
+            ->whereDate('tanggal_berobat', today());
+
+        if ($userPoliklinikId) {
+            $antreansQuery->whereHas('jadwal', function ($q) use ($userPoliklinikId) {
+                $q->where('poliklinik_id', $userPoliklinikId);
+            });
+        }
+
+        $antreans = $antreansQuery->orderBy('id', 'asc')->get();
 
         $sedangDipanggil = $antreans->where('status', 'dipanggil')->first();
         $menunggu        = $antreans->where('status', 'menunggu')->values();
@@ -83,7 +91,7 @@ class AntreanController extends Controller
             ->whereDate('tanggal_berobat', today())
             ->where('status', 'dipanggil')
             ->orderBy('updated_at', 'desc')
-            ->first();
+            ->get();
 
         $antreanSelanjutnya = Antrean::with('jadwal.poliklinik')
             ->whereDate('tanggal_berobat', today())
@@ -195,12 +203,16 @@ class AntreanController extends Controller
 
     public function panggilPasien(int $id)
     {
-        // Reset semua yang masih dipanggil ke menunggu terlebih dahulu
-        Antrean::whereDate('tanggal_berobat', today())
+        $antrean = Antrean::with('user', 'jadwal.poliklinik')->findOrFail($id);
+
+        // Reset semua yang masih dipanggil pada poli yang sama ke menunggu terlebih dahulu
+        Antrean::whereHas('jadwal', function ($q) use ($antrean) {
+                $q->where('poliklinik_id', $antrean->jadwal->poliklinik_id);
+            })
+            ->whereDate('tanggal_berobat', today())
             ->where('status', 'dipanggil')
             ->update(['status' => 'menunggu']);
 
-        $antrean = Antrean::with('user', 'jadwal.poliklinik')->findOrFail($id);
         $antrean->update(['status' => 'dipanggil']);
 
         // MENGIRIM NOTIFIKASI WHATSAPP MELALUI FONNTE API
@@ -212,9 +224,10 @@ class AntreanController extends Controller
             $pesan .= "Terima kasih telah mempercayakan layanan kesehatan Anda pada RSPro.";
 
             try {
-                \Illuminate\Support\Facades\Http::withHeaders([
-                    'Authorization' => env('FONNTE_TOKEN'),
-                ])->post('https://api.fonnte.com/send', [
+                \Illuminate\Support\Facades\Http::withoutVerifying()
+                    ->withHeaders([
+                        'Authorization' => env('FONNTE_TOKEN'),
+                    ])->asForm()->post('https://api.fonnte.com/send', [
                     'target' => $antrean->user->no_hp,
                     'message' => $pesan,
                     'countryCode' => '62', // Default kode negara Indonesia
